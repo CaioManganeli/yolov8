@@ -1,0 +1,56 @@
+!nvidia-smi
+
+"""Instalar a YOLOv8"""
+
+!pip install ultralytics
+
+from ultralytics import YOLO
+import os
+from IPython.display import display, Image
+from IPython import display
+display.clear_output()
+!yolo checks
+
+"""Train YOLOv8 Model on Custom Dataset"""
+
+!pip install roboflow
+
+from roboflow import Roboflow
+rf = Roboflow(api_key="confidential")
+project = rf.workspace("tcc-subsea-object-detection")
+.project("subsea-non-conformity-events")
+version = project.version(3)
+dataset = version.download("yolov8")
+
+!yolo task=detect mode=train model=yolov8x.pt data={dataset.location}/data.yaml epochs=100 #imgsz=640
+
+Image(filename=f'/content/runs/detect/train/F1_curve.png', width=600)
+
+Image(filename=f'/content/runs/detect/train/PR_curve.png', width=600)
+
+Image(filename=f'/content/runs/detect/train/confusion_matrix.png', width=800)
+
+Image(filename=f'/content/runs/detect/train/confusion_matrix_normalized.png', width=800)
+
+Image(filename=f'/content/runs/detect/train/results.png', width=600)
+
+Image(filename=f'/content/runs/detect/train/labels_correlogram.jpg', width=800)
+
+Image(filename=f'/content/runs/detect/train/train_batch2.jpg', width=800)
+
+Image(filename=f'/content/runs/detect/train/train_batch812.jpg', width=800)
+
+Image(filename=f'/content/runs/detect/train/val_batch0_labels.jpg', width=800)
+
+Image(filename=f'/content/runs/detect/train/val_batch0_pred.jpg', width=800)
+
+!yolo task=detect mode=val model=/content/runs/detect/train/weights/best.pt data={dataset.location}/data.yaml
+
+!yolo task=detect mode=predict model=/content/runs/detect/train/weights/best.pt conf=0.2 source={dataset.location}/test/images
+
+import glob
+from IPython.display import Image, display
+
+for image_path in glob.glob(f'/content/runs/detect/predict/*.jpg'):
+  display(Image(filename=image_path, height=500))
+  print("\n")
